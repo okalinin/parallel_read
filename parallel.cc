@@ -41,6 +41,7 @@ int gThreadCount;
 // some stats
 tStat gStat;
 
+// main function
 int main(int argc, char *argv[]) {
 
     if (!init_from_args(argc, argv)) {
@@ -54,12 +55,14 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
+// usage
 void usage() {
     cout << "usage: parallel_read <filelist> <threads> <buffer size in kb>" << endl; 
     cout << "    example: ./parallel_read /tmp/files.txt 32 128" << endl;
     cout << "    this will use /tmp/files.txt as list of files, will use 32 threads, buffer size 128KB" << endl;
 }
 
+// initialize queue of filenames and variables
 bool init_from_args(int iArgc, char *iArgv[]) {
     if (iArgc < 3 || iArgc > 4) {
         return false;
@@ -105,6 +108,7 @@ bool init_from_args(int iArgc, char *iArgv[]) {
     return true;
 }
 
+// execute all threads, periodically print some stats, close on completion
 void run() {
     pthread_t aThreads[gNumOfThreads];
     tStat aCurrentStat;
@@ -145,6 +149,7 @@ void run() {
     }
 }
 
+// thread function
 void * thread_func(void *iArgv) {
     bool aExit = false;
     string aFileName;
@@ -173,6 +178,7 @@ void * thread_func(void *iArgv) {
     return NULL;
 }
 
+// open, read and close the file
 void read_file(string iFileName) {
     char aBuffer[gBufSize];
 
@@ -191,12 +197,14 @@ void read_file(string iFileName) {
     aFile.close();
 }
 
+// update number of bytes read
 void update_stats(int iBytes) {
     pthread_mutex_lock(&gStatsLock);
     gStat.nbytes_ += iBytes;
     pthread_mutex_unlock(&gStatsLock);
 }
 
+// print total and current interval stats
 void flush_stats(tStat * iCurrentStat) {
     struct timeval aTime;
     struct timeval aTimeSinceLastSnapshot;
