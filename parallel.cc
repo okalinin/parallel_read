@@ -207,11 +207,14 @@ void flush_stats(tStat * iCurrentStat) {
     unsigned long long aBytes = gStat.nbytes_ - iCurrentStat->nbytes_;
     timersub(&aTime, &iCurrentStat->ts_, &aTimeSinceLastSnapshot);
     timersub(&aTime, &gStat.ts_, &aTotalTime);
-    unsigned int aCurThroughput = (aBytes / 1048576 * 1000000) / (aTimeSinceLastSnapshot.tv_sec * 1000000 + aTimeSinceLastSnapshot.tv_usec);
-    unsigned int aTotalThroughput = (gStat.nbytes_ / 1048576 * 1000000) / (aTotalTime.tv_sec * 1000000 + aTotalTime.tv_usec);
+    unsigned int aCurThroughput = 
+        (aBytes / 1048576 * 1000000) / (aTimeSinceLastSnapshot.tv_sec * 1000000 + aTimeSinceLastSnapshot.tv_usec);
+    unsigned int aTotalThroughput =
+        (gStat.nbytes_ / 1048576 * 1000000) / (aTotalTime.tv_sec * 1000000 + aTotalTime.tv_usec);
     iCurrentStat->nbytes_ = gStat.nbytes_;
     memcpy(&iCurrentStat->ts_, &aTime, sizeof(struct timeval));
     pthread_mutex_unlock(&gStatsLock);
 
-    cout << "[" << gThreadCount << " active threads, " << gFileQueue.size() << " files pending] throughput: current: " << aCurThroughput << " MB/sec, total: " << aTotalThroughput << " MB/sec" << endl;
+    cout << "[" << gThreadCount << " active threads, " << gFileQueue.size() << " files pending] throughput: current: " 
+        << aCurThroughput << " MB/sec, total: " << aTotalThroughput << " MB/sec" << endl;
 }
