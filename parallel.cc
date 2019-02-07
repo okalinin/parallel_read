@@ -215,6 +215,8 @@ void flush_stats(tStat * iCurrentStat) {
     memcpy(&iCurrentStat->ts_, &aTime, sizeof(struct timeval));
     pthread_mutex_unlock(&gStatsLock);
 
+    pthread_mutex_lock(&gQueueLock);
     cout << "[" << gThreadCount << " active threads, " << gFileQueue.size() << " files pending] throughput: current: " 
         << aCurThroughput << " MB/sec, total: " << aTotalThroughput << " MB/sec" << endl;
+    pthread_mutex_unlock(&gQueueLock);
 }
