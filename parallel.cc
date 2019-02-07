@@ -123,10 +123,6 @@ void run() {
     for (int i = 0; i < gNumOfThreads; ++i) {
         if (pthread_create(&aThreads[i], NULL, &thread_func, NULL) != 0) {
             cerr << "pthread_create error for thread " << i << ", error: " << errno << endl;
-        } else {
-            pthread_mutex_lock(&gThreadCountLock);
-            gThreadCount++;
-            pthread_mutex_unlock(&gThreadCountLock);
         }
     }
 
@@ -151,24 +147,25 @@ void run() {
 
 // thread function
 void * thread_func(void *iArgv) {
-    bool aExit = false;
+
+    pthread_mutex_lock(&gThreadCountLock);
+    gThreadCount++;
+    pthread_mutex_unlock(&gThreadCountLock);
+
     string aFileName;
 
     for (;;) {
         pthread_mutex_lock(&gQueueLock);
         if (gFileQueue.empty()) {
-            aExit = true;
+            pthread_mutex_unlock(&gQueueLock);
+            break;
         } else {
             aFileName = gFileQueue.front();
             gFileQueue.pop();
         }
         pthread_mutex_unlock(&gQueueLock);
 
-        if (aExit == true) {
-            break;
-        } else {
-            read_file(aFileName);
-        }
+        read_file(aFileName);
     }
 
     pthread_mutex_lock(&gThreadCountLock);
