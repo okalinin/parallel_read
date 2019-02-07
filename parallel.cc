@@ -123,25 +123,20 @@ void run() {
     for (int i = 0; i < gNumOfThreads; ++i) {
         if (pthread_create(&aThreads[i], NULL, &thread_func, NULL) != 0) {
             cerr << "pthread_create error for thread " << i << ", error: " << errno << endl;
+            return;
         }
     }
 
-    for (;;) {
-        sleep (1);
-        pthread_mutex_lock(&gQueueLock);
-        if (gFileQueue.empty()) {
-            pthread_mutex_unlock(&gQueueLock);
-            break;
-        } else {
-            flush_stats(&aCurrentStat);
-        }
-        pthread_mutex_unlock(&gQueueLock);
+    sleep(1);
+
+    while (gThreadCount > 0) {
+        flush_stats(&aCurrentStat);
+        sleep(1);
     }
 
-    cout << "no more files pending, joining threads and exiting" << endl;
-    void *pResult;
+    cout << "all threads completed, joining and exiting" << endl;
     for (int i = 0; i < gNumOfThreads; ++i) {
-        pthread_join(aThreads[i], &pResult);
+        pthread_join(aThreads[i], NULL);
     }
 }
 
